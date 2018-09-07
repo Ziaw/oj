@@ -300,9 +300,45 @@ class CustomJuice < Minitest::Test
     dump_and_load(obj, false, :create_id => "^o", :create_additions => true)
   end
 
+  def test_date_unix
+    obj = Date.new(2017, 1, 5)
+    json = Oj.dump(obj, :indent => 2, time_format: :unix)
+    assert_equal('1483592400.000000000', json)
+  end
+
+  def test_date_ruby
+    obj = Date.new(2017, 1, 5)
+    json = Oj.dump(obj, :indent => 2, time_format: :ruby)
+    assert_equal('"2017-01-05 00:00:00 -0500"', json)
+  end
+
+  def test_date_xmlschema
+    obj = Date.new(2017, 1, 5)
+    json = Oj.dump(obj, :indent => 2, time_format: :xmlschema)
+    assert_equal('"2017-01-05T00:00:00-05:00"', json)
+  end
+
   def test_datetime
     obj = DateTime.new(2017, 1, 5, 10, 20, 30)
     dump_and_load(obj, false, :create_id => "^o", :create_additions => true)
+  end
+
+  def test_datetime_unix
+    obj = DateTime.new(2017, 1, 5, 10, 20, 30, '-0500')
+    json = Oj.dump(obj, :indent => 2, time_format: :unix)
+    assert_equal('1483629630.000000000', json)
+  end
+
+  def test_datetime_ruby
+    obj = DateTime.new(2017, 1, 5, 10, 20, 30, '-0500')
+    json = Oj.dump(obj, :indent => 2, time_format: :ruby)
+    assert_equal('"2017-01-05 10:20:30 -0500"', json)
+  end
+
+  def test_datetime_xmlschema
+    obj = DateTime.new(2017, 1, 5, 10, 20, 30, '-0500')
+    json = Oj.dump(obj, :indent => 2, time_format: :xmlschema)
+    assert_equal('"2017-01-05T10:20:30-05:00"', json)
   end
 
   def test_regexp

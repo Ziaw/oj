@@ -80,14 +80,39 @@ complex_load(VALUE clas, VALUE args) {
 }
 
 static void
-date_dump(VALUE obj, int depth, Out out) {
-    struct _Attr	attrs[] = {
-	{ "s", 1, Qnil },
-	{ NULL, 0, Qnil },
-    };
-    attrs->value = rb_funcall(obj, rb_intern("iso8601"), 0);
+time_dump(VALUE obj, int depth, Out out) {
+    if (Yes == out->opts->create_ok) {
+	struct _Attr	attrs[] = {
+	    { "time", 4, Qundef, 0, Qundef },
+	    { NULL, 0, Qnil },
+	};
+	attrs->time = obj;
 
-    oj_code_attrs(obj, attrs, depth, out, Yes == out->opts->create_ok);
+	oj_code_attrs(obj, attrs, depth, out, true);
+    } else {
+	switch (out->opts->time_format) {
+	case RubyTime:	oj_dump_ruby_time(obj, out);	break;
+	case XmlTime:	oj_dump_xml_time(obj, out);	break;
+	case UnixZTime:	oj_dump_time(obj, out, true);	break;
+	case UnixTime:
+	default:	oj_dump_time(obj, out, false);	break;
+	}
+    }
+}
+
+static void
+date_dump(VALUE obj, int depth, Out out) {
+    if (Yes == out->opts->create_ok) {
+	struct _Attr	attrs[] = {
+	    { "s", 1, Qnil },
+	    { NULL, 0, Qnil },
+	};
+	attrs->value = rb_funcall(obj, rb_intern("iso8601"), 0);
+
+	oj_code_attrs(obj, attrs, depth, out, Yes == out->opts->create_ok);
+    } else {
+	return time_dump(rb_funcall(obj, rb_intern("to_time"), 0), depth, out);
+    }
 }
 
 static VALUE
@@ -198,27 +223,6 @@ regexp_load(VALUE clas, VALUE args) {
 	return rb_funcall(rb_cRegexp, oj_new_id, 1, v);
     }
     return Qnil;
-}
-
-static void
-time_dump(VALUE obj, int depth, Out out) {
-    if (Yes == out->opts->create_ok) {
-	struct _Attr	attrs[] = {
-	    { "time", 4, Qundef, 0, Qundef },
-	    { NULL, 0, Qnil },
-	};
-	attrs->time = obj;
-
-	oj_code_attrs(obj, attrs, depth, out, true);
-    } else {
-	switch (out->opts->time_format) {
-	case RubyTime:	oj_dump_ruby_time(obj, out);	break;
-	case XmlTime:	oj_dump_xml_time(obj, out);	break;
-	case UnixZTime:	oj_dump_time(obj, out, true);	break;
-	case UnixTime:
-	default:	oj_dump_time(obj, out, false);	break;
-	}
-    }
 }
 
 static VALUE
