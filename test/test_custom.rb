@@ -301,18 +301,19 @@ class CustomJuice < Minitest::Test
   end
 
   def test_date_unix
-    obj = Date.new(2017, 1, 5)
+    obj = DateTime.new(2017, 1, 5, 0, 0, 0, '-0500').to_date
     json = Oj.dump(obj, :indent => 2, time_format: :unix)
     assert_equal('1483592400.000000000', json)
   end
 
   def test_date_ruby
-    obj = Date.new(2017, 1, 5)
+    obj = DateTime.new(2017, 1, 5, 0, 0, 0, '-0500').to_date
     json = Oj.dump(obj, :indent => 2, time_format: :ruby)
     assert_equal('"2017-01-05 00:00:00 -0500"', json)
   end
 
   def test_date_xmlschema
+    obj = DateTime.new(2017, 1, 5, 0, 0, 0, '-0500').to_date
     obj = Date.new(2017, 1, 5)
     json = Oj.dump(obj, :indent => 2, time_format: :xmlschema)
     assert_equal('"2017-01-05T00:00:00-05:00"', json)
