@@ -111,7 +111,24 @@ date_dump(VALUE obj, int depth, Out out) {
 
 	oj_code_attrs(obj, attrs, depth, out, Yes == out->opts->create_ok);
     } else {
-	return time_dump(rb_funcall(obj, rb_intern("to_time"), 0), depth, out);
+	volatile VALUE	v;
+	
+	switch (out->opts->time_format) {
+	case RubyTime:
+	case XmlTime:
+	    v = rb_funcall(obj, rb_intern("iso8601"), 0);
+	    oj_dump_cstr(rb_string_value_ptr((VALUE*)&v), RSTRING_LEN(v), 0, 0, out);
+	    break;
+	case UnixZTime:
+	    v = rb_funcall(obj, rb_intern("to_time"), 0);
+	    oj_dump_time(v, out, true);
+	    break;
+	case UnixTime:
+	default:
+	    v = rb_funcall(obj, rb_intern("to_time"), 0);
+	    oj_dump_time(v, out, false);
+	    break;
+	}
     }
 }
 
