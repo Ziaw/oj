@@ -303,13 +303,13 @@ class CustomJuice < Minitest::Test
   def test_date_unix
     obj = Date.new(2017, 1, 5)
     json = Oj.dump(obj, :indent => 2, time_format: :unix)
-    assert_equal('1483592400.000000000', json)
+    assert_equal('1483574400.000000000', json)
   end
 
   def test_date_unix_zone
     obj = Date.new(2017, 1, 5)
-    json = Oj.dump(obj, :indent => 2, time_format: :unix)
-    assert_equal('1483592400.000000000', json)
+    json = Oj.dump(obj, :indent => 2, time_format: :unix_zone)
+    assert_equal('1483574400.000000000', json)
   end
 
   def test_date_ruby

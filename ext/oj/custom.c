@@ -112,6 +112,7 @@ date_dump(VALUE obj, int depth, Out out) {
 	oj_code_attrs(obj, attrs, depth, out, Yes == out->opts->create_ok);
     } else {
 	volatile VALUE	v;
+	volatile VALUE	ov;
 	
 	switch (out->opts->time_format) {
 	case RubyTime:
@@ -121,11 +122,23 @@ date_dump(VALUE obj, int depth, Out out) {
 	    break;
 	case UnixZTime:
 	    v = rb_funcall(obj, rb_intern("to_time"), 0);
-	    oj_dump_time(v, out, true);
+	    if (oj_date_class == rb_obj_class(obj)) {
+		ov = rb_funcall(v, rb_intern("utc_offset"), 0);
+		v = rb_funcall(v, rb_intern("utc"), 0);
+		v = rb_funcall(v, rb_intern("+"), 1, ov);
+		oj_dump_time(v, out, false);
+	    } else {
+		oj_dump_time(v, out, true);
+	    }
 	    break;
 	case UnixTime:
 	default:
 	    v = rb_funcall(obj, rb_intern("to_time"), 0);
+	    if (oj_date_class == rb_obj_class(obj)) {
+		ov = rb_funcall(v, rb_intern("utc_offset"), 0);
+		v = rb_funcall(v, rb_intern("utc"), 0);
+		v = rb_funcall(v, rb_intern("+"), 1, ov);
+	    }
 	    oj_dump_time(v, out, false);
 	    break;
 	}
